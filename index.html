@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Conference Planner</title>
+    
+    <!-- FullCalendar CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js" integrity="sha384-WfE/vOHqht3KDj6FvpwQUf3UxEPUHoGJ3w1yZ8rhpLWnVigt8HjXL2zXqtcfS7mf" crossorigin="anonymous" rel='stylesheet'></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #1e293b;
+        }
+        
+        .page-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+        
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #00476b 0%, #00476b 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid #b8d1c9;
+        }
+        
+        .header-left h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-left p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .header-right {
+            text-align: right;
+        }
+        
+        .company-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #0071b3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+        
+        .btn-success {
+            background: #059669;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #047857;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        
+        .file-input:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+        }
+        
+        .stat-detail {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+        
+        /* Type Distribution */
+        .type-list {
+            list-style: none;
+        }
+        
+        .type-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .type-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        
+        .type-name {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        .type-count {
+            font-weight: 600;
+            color: #1e293b;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        /* Alert Box */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            color: #92400e;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            background: white;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #calendar {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Calendar customization */
+        .fc {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 20px !important;
+            font-weight: 600 !important;
+            color: #1e293b !important;
+        }
+        
+        .fc-button {
+            background: #4b606b !important;
+            border: none !important;
+            text-transform: capitalize !important;
+            font-weight: 500 !important;
+            padding: 8px 16px !important;
+        }
+        
+        .fc-button:hover {
+            background: #00476b !important;
+        }
+        
+        .fc-button-active {
+            background: #00476b !important;
+        }
+        
+        .fc-col-header-cell {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 12px 4px !important;
+        }
+        
+        .fc-timegrid-slot {
+            height: 3em !important;
+        }
+        
+        .fc-timegrid-axis {
+            width: 58px !important;
+        }
+        
+        .fc-timegrid-slot-label {
+            font-size: 13px !important;
+            font-weight: 500 !important;
+        }
+        
+        .fc-event {
+            border-radius: 4px !important;
+            border-left-width: 4px !important;
+            padding: 4px 8px !important;
+            font-size: 13px !important;
+        }
+        
+        .fc-event-title {
+            font-weight: 600 !important;
+        }
+        
+        .fc-event-duration {
+            font-size: 11px;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+        
+        /* Event colors - Corporate palette */
+        .fc-event-session {
+            background-color: #0071b3 !important;
+            border-color: #0071b3 !important;
+            color: white !important;
+        }
+        
+        .fc-event-break {
+            background-color: #64748B !important;
+            border-color: #64748B !important;
+            color: white !important;
+        }
+        
+        .fc-event-administrative {
+            background-color: #2196C4 !important;
+            border-color: #2196C4!important;
+            color: white !important;
+        }
+        
+        .fc-event-engagement {
+            background-color: #059669 !important;
+            border-color: #047857 !important;
+            color: white !important;
+        }
+        
+        /* Footer */
+        .footer {
+            grid-column: 1 / -1;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 20px 40px;
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-left {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Print styles */
+        @media print {
+            .sidebar, .footer {
+                display: none;
+            }
+            .page-container {
+                grid-template-columns: 1fr;
+            }
+            .main-content {
+                padding: 0;
+            }
+        }
+
+        /* ── Custom Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(3px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06);
+            width: 420px;
+            max-width: calc(100vw - 40px);
+            overflow: hidden;
+            animation: modalIn 0.18s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1);    }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #00476b, #005f8f);
+            color: white;
+            padding: 20px 24px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .modal-header .modal-icon {
+            font-size: 20px;
+            opacity: 0.85;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #475569;
+            margin-bottom: 7px;
+        }
+
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1e293b;
+            background: #f8fafc;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0071b3;
+            box-shadow: 0 0 0 3px rgba(0, 113, 179, 0.15);
+            background: white;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '▾';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        /* Coloured pill preview next to dropdown */
+        .type-preview {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .type-preview-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .modal-footer {
+            padding: 16px 24px 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .modal-btn {
+            padding: 9px 20px;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s;
+        }
+
+        .modal-btn-cancel {
+            background: white;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .modal-btn-confirm {
+            background: #0071b3;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #005f8f;
+            box-shadow: 0 4px 12px rgba(0, 113, 179, 0.3);
+        }
+
+        /* Edit modal reuses same styles; header text differs */
+        .modal-header.edit-mode {
+            background: linear-gradient(135deg, #1e3a5f, #2a5080);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h1>CSV Conference Planner</h1>
+                <p>Agenda planning made visual</p>
+            </div>
+            <div class="header-right">
+            </div>
+        </header>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Load Data</h3>
+                <input type="file" id="fileInput" accept=".csv" class="file-input" title="Upload Schedule CSV">
+                <button onclick="loadExampleData()" class="btn btn-secondary">Load Example Data</button>
+                <button onclick="downloadSchedule()" class="btn btn-success">Download Schedule</button>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Session Types</h3>
+                <ul class="type-list" id="typeList"></ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <div id="clashAlert" class="alert alert-warning">
+                    <strong>⚠ Schedule Conflicts</strong>
+                    <div id="clashText"></div>
+                </div>
+                <div id="successAlert" class="alert alert-success">
+                    <strong>✓ All Clear</strong>
+                    <div>No scheduling conflicts detected</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="calendar-header">
+                <h2 class="calendar-title">Event Calendar</h2>
+            </div>
+            <div id="calendar"></div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-left"></div>
+            <div class="footer-right">
+                <span id="lastUpdated">Last updated: 2/23/2026</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         NEW SESSION MODAL
+    ══════════════════════════════════════════ -->
+    <div class="modal-overlay" id="newEventModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add New Session</h3>
+                <span class="modal-icon">📅</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newSessionName">Session Name</label>
+                    <input type="text" id="newSessionName" placeholder="Enter session name…" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="newSessionType">Session Type</label>
+                    <div class="select-wrapper">
+                        <select id="newSessionType" onchange="updateTypePreview('newSessionType','newTypePreview')">
+                            <option value="session">Session</option>
+                            <option value="break">Break</option>
+                            <option value="administrative">Administrative</option>
+                            <option value="engagement">Engagement</option>
+                        </select>
+                    </div>
+                    <div class="type-preview">
+                        <span class="type-preview-dot" id="newTypePreview" style="background:#0071b3"></span>
+                        <span id="newTypePreviewLabel">Session</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('newEventModal')">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmNewEvent()">Add Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         EDIT SESSION MODAL
+    ══════════════════════════════════════════ -->
+    <div class="modal-overlay" id="editEventModal">
+        <div class="modal">
+            <div class="modal-header edit-mode">
+                <h3>Edit Session</h3>
+                <span class="modal-icon">✏️</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editSessionName">Session Name</label>
+                    <input type="text" id="editSessionName" placeholder="Enter session name…" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="editSessionType">Session Type</label>
+                    <div class="select-wrapper">
+                        <select id="editSessionType" onchange="updateTypePreview('editSessionType','editTypePreview')">
+                            <option value="session">Session</option>
+                            <option value="break">Break</option>
+                            <option value="administrative">Administrative</option>
+                            <option value="engagement">Engagement</option>
+                        </select>
+                    </div>
+                    <div class="type-preview">
+                        <span class="type-preview-dot" id="editTypePreview" style="background:#0071b3"></span>
+                        <span id="editTypePreviewLabel">Session</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" onclick="closeModal('editEventModal')">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmEditEvent()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js" integrity="sha384-WfE/vOHqht3KDj6FvpwQUf3UxEPUHoGJ3w1yZ8rhpLWnVigt8HjXL2zXqtcfS7mf" crossorigin="anonymous"></script>
+    
+    <script>
+        let calendar;
+        let scheduleData = [];
+
+        // Pending state for modal callbacks
+        let pendingNewEventInfo = null;
+        let pendingEditEvent    = null;
+        
+        // Color mapping for types
+        const typeColors = {
+            'session':        { bg: '#0071b3', border: '#005f8f', label: 'Sessions' },
+            'break':          { bg: '#64748b', border: '#475569', label: 'Breaks' },
+            'administrative': { bg: '#2196C4', border: '#1a7ca8', label: 'Administrative' },
+            'engagement':     { bg: '#059669', border: '#047857', label: 'Engagement' }
+        };
+
+        // ── Modal helpers ─────────────────────────────────────────────────────────
+
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            // Clear pending state
+            if (id === 'newEventModal') {
+                pendingNewEventInfo = null;
+                // Deselect calendar selection
+                calendar.unselect();
+            }
+            if (id === 'editEventModal') {
+                pendingEditEvent = null;
+            }
+        }
+
+        // Close modal when clicking outside the box
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    closeModal(overlay.id);
+                }
+            });
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal('newEventModal');
+                closeModal('editEventModal');
+            }
+            // Confirm new event on Enter (if modal open)
+            if (e.key === 'Enter' && document.getElementById('newEventModal').classList.contains('active')) {
+                confirmNewEvent();
+            }
+            if (e.key === 'Enter' && document.getElementById('editEventModal').classList.contains('active')) {
+                confirmEditEvent();
+            }
+        });
+
+        // Update the colour dot + label when the dropdown changes
+        function updateTypePreview(selectId, dotId) {
+            const select = document.getElementById(selectId);
+            const dot    = document.getElementById(dotId);
+            const label  = document.getElementById(dotId + 'Label');
+            const type   = select.value;
+            const info   = typeColors[type] || { bg: '#94a3b8', label: type };
+            dot.style.background = info.bg;
+            // The label span id follows pattern dotId + 'Label'
+            label.textContent = info.label || type.charAt(0).toUpperCase() + type.slice(1);
+        }
+
+        // ── New event flow ────────────────────────────────────────────────────────
+
+        function createNewEvent(info) {
+            pendingNewEventInfo = info;
+            // Reset form
+            document.getElementById('newSessionName').value = '';
+            document.getElementById('newSessionType').value = 'session';
+            updateTypePreview('newSessionType', 'newTypePreview');
+            openModal('newEventModal');
+            // Focus name field after animation
+            setTimeout(() => document.getElementById('newSessionName').focus(), 60);
+        }
+
+        function confirmNewEvent() {
+            const title = document.getElementById('newSessionName').value.trim();
+            const type  = document.getElementById('newSessionType').value;
+
+            if (!title) {
+                document.getElementById('newSessionName').focus();
+                document.getElementById('newSessionName').style.borderColor = '#ef4444';
+                setTimeout(() => document.getElementById('newSessionName').style.borderColor = '', 1200);
+                return;
+            }
+
+            // Save reference BEFORE closeModal nullifies pendingNewEventInfo
+            const info = pendingNewEventInfo;
+            if (!info) return;
+
+            closeModal('newEventModal');
+
+            const newSession = {
+                session_name: title,
+                author:       'TBD',
+                starts_at:    formatDateTime(info.start),
+                ends_at:      formatDateTime(info.end),
+                type:         type,
+                duration:     Math.round((info.end - info.start) / 60000)
+            };
+
+            scheduleData.push(newSession);
+            const index = scheduleData.length - 1;
+
+            calendar.addEvent({
+                id:    'event_' + index,
+                title: title,
+                start: info.start,
+                end:   info.end,
+                extendedProps: { author: 'TBD', type: type, index: index },
+                className: 'fc-event-' + type.toLowerCase()
+            });
+
+            updateStats();
+            checkClashes();
+            updateFooter();
+            pendingNewEventInfo = null;
+        }
+
+        // ── Edit event flow ───────────────────────────────────────────────────────
+
+        function editEvent(event) {
+            pendingEditEvent = event;
+            document.getElementById('editSessionName').value = event.title;
+            const currentType = event.extendedProps.type || 'session';
+            document.getElementById('editSessionType').value = currentType;
+            updateTypePreview('editSessionType', 'editTypePreview');
+            openModal('editEventModal');
+            setTimeout(() => document.getElementById('editSessionName').focus(), 60);
+        }
+
+        function confirmEditEvent() {
+            const newTitle = document.getElementById('editSessionName').value.trim();
+            const newType  = document.getElementById('editSessionType').value;
+
+            if (!newTitle) {
+                document.getElementById('editSessionName').focus();
+                document.getElementById('editSessionName').style.borderColor = '#ef4444';
+                setTimeout(() => document.getElementById('editSessionName').style.borderColor = '', 1200);
+                return;
+            }
+
+            // Save reference BEFORE closeModal nullifies pendingEditEvent
+            const event = pendingEditEvent;
+            if (!event) return;
+
+            closeModal('editEventModal');
+
+            // Update calendar event
+            event.setProp('title', newTitle);
+            event.setProp('classNames', ['fc-event-' + newType.toLowerCase()]);
+
+            // Update underlying data
+            const index = event.extendedProps.index;
+            if (scheduleData[index]) {
+                scheduleData[index].session_name = newTitle;
+                scheduleData[index].type         = newType;
+            }
+
+            updateStats();
+            updateFooter();
+            pendingEditEvent = null;
+        }
+
+        // ── Calendar init ─────────────────────────────────────────────────────────
+
+        function getNextMonday() {
+            const today = new Date();
+            const day   = today.getDay();
+            const diff  = day === 0 ? 1 : 8 - day;
+            const nextMonday = new Date(today);
+            nextMonday.setDate(today.getDate() + diff);
+            nextMonday.setHours(0, 0, 0, 0);
+            return nextMonday;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                headerToolbar: {
+                    left:   'prev,next today',
+                    center: 'title',
+                    right:  'timeGridWeek,timeGridWorkWeek,timeGridDay'
+                },
+                views: {
+                    timeGridWorkWeek: {
+                        type:       'timeGrid',
+                        duration:   { days: 5 },
+                        buttonText: 'Work Week',
+                        hiddenDays: [0, 6]
+                    }
+                },
+                slotMinTime:    '08:00:00',
+                slotMaxTime:    '18:00:00',
+                slotDuration:   '00:15:00',
+                allDaySlot:     false,
+                editable:       true,
+                selectable:     true,
+                selectMirror:   true,
+                dayMaxEvents:   true,
+                weekends:       true,
+                nowIndicator:   true,
+                displayEventTime: false,
+                eventContent: function(arg) {
+                    const start   = arg.event.start;
+                    const end     = arg.event.end;
+                    const minutes = end ? Math.round((end - start) / 60000) : 0;
+                    return {
+                        html: `<div class="fc-event-main-frame">
+                            <div class="fc-event-title-container">
+                                <div class="fc-event-title fc-sticky">${arg.event.title}</div>
+                                <div class="fc-event-duration">${minutes} min</div>
+                            </div>
+                        </div>`
+                    };
+                },
+                businessHours: {
+                    daysOfWeek: [1, 2, 3, 4, 5],
+                    startTime:  '08:00',
+                    endTime:    '18:00'
+                },
+                
+                eventDrop: function(info) {
+                    updateEventInData(info.event);
+                    checkClashes();
+                    updateStats();
+                    updateFooter();
+                },
+                
+                eventResize: function(info) {
+                    updateEventInData(info.event);
+                    checkClashes();
+                    updateStats();
+                    updateFooter();
+                },
+                
+                eventClick: function(info) {
+                    editEvent(info.event);
+                },
+                
+                select: function(info) {
+                    createNewEvent(info);
+                }
+            });
+            
+            calendar.render();
+            loadExampleData();
+            updateFooter();
+        });
+        
+        // ── Data helpers ──────────────────────────────────────────────────────────
+
+        // Show a brief green/red toast
+        function showToast(message, isError) {
+            var toast = document.getElementById('csvToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'csvToast';
+                toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:14px;font-weight:500;font-family:inherit;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:99999;transition:opacity 0.4s;pointer-events:none;';
+                document.body.appendChild(toast);
+            }
+            toast.textContent      = message;
+            toast.style.background = isError ? '#ef4444' : '#059669';
+            toast.style.color      = 'white';
+            toast.style.opacity    = '1';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(function() { toast.style.opacity = '0'; }, 3500);
+        }
+
+        function parseCSV(text) {
+            // Strip BOM and normalise Windows/Mac line endings
+            text = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+            // Robust splitter - handles empty cells, quoted fields with commas
+            function splitRow(line) {
+                var fields = [], cur = '', inQuote = false;
+                for (var i = 0; i < line.length; i++) {
+                    var ch = line[i];
+                    if (ch === '"') {
+                        if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
+                        else inQuote = !inQuote;
+                    } else if (ch === ',' && !inQuote) {
+                        fields.push(cur.trim());
+                        cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                fields.push(cur.trim());
+                return fields;
+            }
+
+            var lines   = text.trim().split('\n');
+            var headers = splitRow(lines[0]);
+            var data    = [];
+
+            for (var i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                var values = splitRow(lines[i]);
+                var row    = {};
+                headers.forEach(function(header, idx) {
+                    row[header] = (values[idx] !== undefined) ? values[idx] : '';
+                });
+                if (row.session_name) data.push(row);
+            }
+            return data;
+        }
+        
+        function loadSchedule(data) {
+            scheduleData = data;
+            calendar.removeAllEvents();
+            
+            let earliestDate = null;
+            
+            data.forEach((session, index) => {
+                const startDate = parseDateTime(session.starts_at);
+                if (!earliestDate || startDate < earliestDate) earliestDate = startDate;
+                
+                calendar.addEvent({
+                    id:    'event_' + index,
+                    title: session.session_name,
+                    start: startDate,
+                    end:   parseDateTime(session.ends_at),
+                    extendedProps: {
+                        author: session.author,
+                        type:   session.type,
+                        index:  index
+                    },
+                    className: 'fc-event-' + session.type.toLowerCase().replace(/\//g, '')
+                });
+            });
+            
+            if (earliestDate) calendar.gotoDate(earliestDate);
+            
+            updateStats();
+            checkClashes();
+            updateFooter();
+        }
+        
+        function parseDateTime(dateStr) {
+            if (!dateStr) return new Date();
+            dateStr = dateStr.trim();
+            let date = new Date(dateStr);
+            
+            if (isNaN(date.getTime())) {
+                const parts = dateStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)?/i);
+                if (parts) {
+                    let [, year, month, day, hour, minute, second, ampm] = parts;
+                    hour = parseInt(hour);
+                    if (ampm) {
+                        if (ampm.toUpperCase() === 'PM' && hour < 12) hour += 12;
+                        if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+                    }
+                    date = new Date(year, month - 1, day, hour, minute, second);
+                }
+            }
+            return date;
+        }
+        
+        function formatDateTime(date) {
+            const year    = date.getFullYear();
+            const month   = String(date.getMonth() + 1).padStart(2, '0');
+            const day     = String(date.getDate()).padStart(2, '0');
+            let   hours   = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            const ampm    = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${year}-${month}-${day} ${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+        }
+        
+        function updateEventInData(event) {
+            const index = event.extendedProps.index;
+            if (scheduleData[index]) {
+                scheduleData[index].starts_at = formatDateTime(event.start);
+                scheduleData[index].ends_at   = formatDateTime(event.end);
+                scheduleData[index].duration  = Math.round((event.end - event.start) / 60000);
+            }
+        }
+        
+        function updateStats() {
+            const types = {};
+            scheduleData.forEach(session => {
+                types[session.type] = (types[session.type] || 0) + 1;
+            });
+            
+            const typeList = document.getElementById('typeList');
+            typeList.innerHTML = '';
+            
+            Object.keys(types).forEach(type => {
+                const colorInfo = typeColors[type] || { bg: '#94a3b8', label: type };
+                const li = document.createElement('li');
+                li.className = 'type-item';
+                li.innerHTML = `
+                    <span class="type-name">
+                        <span class="type-color" style="background: ${colorInfo.bg}"></span>
+                        ${colorInfo.label || type}
+                    </span>
+                    <span class="type-count">${types[type]}</span>
+                `;
+                typeList.appendChild(li);
+            });
+        }
+        
+        function checkClashes() {
+            let clashCount = 0;
+            for (let i = 0; i < scheduleData.length; i++) {
+                for (let j = i + 1; j < scheduleData.length; j++) {
+                    const start1 = parseDateTime(scheduleData[i].starts_at);
+                    const end1   = parseDateTime(scheduleData[i].ends_at);
+                    const start2 = parseDateTime(scheduleData[j].starts_at);
+                    const end2   = parseDateTime(scheduleData[j].ends_at);
+                    if (start1 < end2 && start2 < end1) clashCount++;
+                }
+            }
+            
+            const clashAlert   = document.getElementById('clashAlert');
+            const successAlert = document.getElementById('successAlert');
+            
+            if (clashCount > 0) {
+                document.getElementById('clashText').textContent =
+                    `${clashCount} conflict${clashCount > 1 ? 's' : ''} detected`;
+                clashAlert.classList.add('show');
+                successAlert.classList.remove('show');
+            } else {
+                clashAlert.classList.remove('show');
+                successAlert.classList.add('show');
+            }
+        }
+        
+        function updateFooter() {
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent =
+                'Last updated: ' + now.toLocaleDateString();
+        }
+        
+        function downloadSchedule() {
+            if (scheduleData.length === 0) {
+                alert('No schedule data to download!');
+                return;
+            }
+            
+            let csv = 'session_name,author,starts_at,ends_at,duration,type\n';
+            scheduleData.forEach(session => {
+                csv += `"${session.session_name}","${session.author}","${session.starts_at}","${session.ends_at}",${session.duration},"${session.type}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url  = window.URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = 'conference_schedule_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function loadExampleData() {
+            const monday = getNextMonday();
+            
+            function getDate(dayOffset, hour, minute) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + dayOffset);
+                d.setHours(hour, minute, 0, 0);
+                return d;
+            }
+            
+            const exampleData = [
+                // Day 1
+                { session_name: 'Opening Keynote',            author: 'Dr. Jane Smith',    starts_at: formatDateTime(getDate(0,  9,  0)), ends_at: formatDateTime(getDate(0,  9, 45)), duration: 45, type: 'session' },
+                { session_name: 'Coffee Break',               author: 'Refreshments',      starts_at: formatDateTime(getDate(0,  9, 45)), ends_at: formatDateTime(getDate(0, 10,  0)), duration: 15, type: 'break' },
+                { session_name: 'Workshop: Data Analytics',   author: 'Prof. John Doe',    starts_at: formatDateTime(getDate(0, 10,  0)), ends_at: formatDateTime(getDate(0, 11,  0)), duration: 60, type: 'session' },
+                { session_name: 'Technical Review',           author: 'NDTAC Team',        starts_at: formatDateTime(getDate(0, 11,  0)), ends_at: formatDateTime(getDate(0, 12,  0)), duration: 60, type: 'administrative' },
+                // Day 2
+                { session_name: 'Strategic Planning Session', author: 'Dr. Alice Johnson', starts_at: formatDateTime(getDate(1,  9,  0)), ends_at: formatDateTime(getDate(1, 10,  0)), duration: 60, type: 'session' },
+                { session_name: 'Coffee Break',               author: 'Refreshments',      starts_at: formatDateTime(getDate(1, 10,  0)), ends_at: formatDateTime(getDate(1, 10, 15)), duration: 15, type: 'break' },
+                { session_name: 'Executive Panel Discussion', author: 'Leadership Team',   starts_at: formatDateTime(getDate(1, 10, 15)), ends_at: formatDateTime(getDate(1, 11, 15)), duration: 60, type: 'session' },
+                { session_name: 'Professional Engagement',    author: 'All Attendees',     starts_at: formatDateTime(getDate(1, 11, 15)), ends_at: formatDateTime(getDate(1, 12,  0)), duration: 45, type: 'engagement' },
+                // Day 3
+                { session_name: 'Quarterly Review',           author: 'Finance Department',starts_at: formatDateTime(getDate(2,  9,  0)), ends_at: formatDateTime(getDate(2, 10, 30)), duration: 90, type: 'session' },
+                { session_name: 'Coffee Break',               author: 'Refreshments',      starts_at: formatDateTime(getDate(2, 10, 30)), ends_at: formatDateTime(getDate(2, 10, 45)), duration: 15, type: 'break' },
+                { session_name: 'Closing Remarks',            author: 'Dr. Jane Smith',    starts_at: formatDateTime(getDate(2, 10, 45)), ends_at: formatDateTime(getDate(2, 12,  0)), duration: 75, type: 'session' }
+            ];
+            
+            loadSchedule(exampleData);
+        }
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    var data = parseCSV(event.target.result);
+                    if (data.length === 0) {
+                        showToast('No sessions found — check your CSV has a session_name column', true);
+                        return;
+                    }
+                    loadSchedule(data);
+                    showToast('Loaded ' + data.length + ' session' + (data.length !== 1 ? 's' : '') + ' successfully');
+                } catch (error) {
+                    showToast('Error loading file: ' + error.message, true);
+                }
+            };
+            reader.readAsText(file);
+            // Reset so the same file can be re-selected
+            e.target.value = '';
+        });
+    </script>
+</body>
+</html>

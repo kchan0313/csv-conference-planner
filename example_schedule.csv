@@ -1,0 +1,12 @@
+session_name,author,starts_at,ends_at,duration,type
+Opening Keynote,Director,3/10/2026 9:00,3/10/2026 9:45,45,session
+Coffee Break,Refreshments,3/10/2026 9:45,3/10/2026 10:00,15,break
+Workshop: Data Analytics,Data Team,3/10/2026 10:00,3/10/2026 11:00,60,session
+Technical Review,Planning Team,3/10/2026 11:00,3/10/2026 12:00,60,administrative
+Strategic Planning Session,Leadership Team,3/11/2026 9:00,3/11/2026 10:00,60,session
+Coffee Break,Refreshments,3/11/2026 10:00,3/11/2026 10:15,15,break
+Executive Panel Discussion,Leadership Team,3/11/2026 10:15,3/11/2026 11:15,60,session
+Professional Engagement,All Attendees,3/11/2026 11:15,3/11/2026 12:00,45,engagement
+Quarterly Review,Finance Department,3/12/2026 9:00,3/12/2026 10:30,90,session
+Coffee Break,Refreshments,3/12/2026 10:30,3/12/2026 10:45,15,break
+Closing Remarks,Director,3/12/2026 10:45,3/12/2026 12:00,75,session
